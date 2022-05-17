@@ -1,0 +1,588 @@
+---
+title: "ESG Project"
+author: "Karene Matoka"
+date: '2022-05-17'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, echo=FALSE}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(broom)
+library(nlme)
+library(broom.mixed) 
+library(GGally)
+library(car)
+```
+
+# TIDY DATA
+
+```{r, message = FALSE}
+# CHANGE THIS TO BE THE CORRECT UPLOAD PATH FOR YOUR COMPUTER
+esg <- read_csv("./ESGData.csv.csv")
+esg %>%
+  rename(Variable = "Indicator Name") %>%
+  rename("Variable code" = "Indicator Code") -> esg
+
+countries <- c("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas, The", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Dem. Rep.", "Congo, Rep.", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt, Arab Rep.", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia, The", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran, Islamic Rep.", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, Dem. People's Rep.", "Korea, Rep.", "Kuwait", "Kyrgyz Republic", "Lao PDR", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta","Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia, Fed. Sts.", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russian Federation", "Rwanda", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovak Republic", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "St. Kitts and Nevis", "St. Lucia", "St. Vincent and the Grenadines", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga","Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela, RB", "Vietnam", "Yemen, Rep.", "Zambia", "Zimbabwe")
+
+# countries <- c("United States", "Canada", "Somalia", "Germany", "Spain", "France", "United Arab Emirates", "Haiti", "Brazil", "India", "Australia", "South Africa", "Japan", "Mexico", "Iceland", "Cuba")
+esg %>%
+  filter(`Country Name` %in% countries) -> esg_countries
+esg_countries
+```
+
+```{r, message=FALSE}
+esg_countries %>%
+  filter(Variable == "Life expectancy at birth, total (years)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2019`) %>%
+    pivot_longer(
+    cols = `1960`:`2019`,
+    names_to = "Year",
+    values_to = "Life_Exp"
+  ) %>%
+  select(`Country Name`, `Year`, `Life_Exp`) -> lifeexp
+
+# DROUGHT 
+esg_countries %>%
+  filter(Variable == "Droughts, floods, extreme temperatures (% of population, average 1990-2009)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `2009`) %>%
+      pivot_longer(
+     cols = `2009`,
+     names_to = "Year",
+     values_to = "Drought"
+   ) %>%
+   select(`Country Name`, `Year`, `Drought`) -> drought
+
+# FOSSIL FUELS
+ esg_countries %>%
+   filter(Variable == "Fossil fuel energy consumption (% of total)") %>%
+   select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2015`) %>%
+      pivot_longer(
+     cols = `1960`:`2015`,
+     names_to = "Year",
+     values_to = "Fossil_Fuels"
+   ) %>%
+   select(`Country Name`, `Year`, `Fossil_Fuels`) -> fossilfuels
+
+# CO2 EMISSIONS
+esg_countries %>%
+  filter(Variable == "CO2 emissions (metric tons per capita)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2018`) %>%
+      pivot_longer(
+     cols = `1960`:`2018`,
+     names_to = "Year",
+     values_to = "CO2"
+   ) %>%
+   select(`Country Name`, `Year`, `CO2`) -> co2
+
+# OVERWEIGHT
+esg_countries %>%
+  filter(Variable == "Prevalence of overweight (% of adults)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1975`:`2016`) %>%
+      pivot_longer(
+     cols = `1975`:`2016`,
+     names_to = "Year",
+     values_to = "Overweight"
+   ) %>%
+   select(`Country Name`, `Year`, `Overweight`)-> overweight 
+
+# UNDER NOURISHMENT
+esg_countries %>%
+  filter(Variable == "Prevalence of undernourishment (% of population)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `2001`:`2019`) %>%
+      pivot_longer(
+     cols = `2001`:`2019`,
+     names_to = "Year",
+     values_to = "Undernourishment"
+   ) %>%
+   select(`Country Name`, `Year`, `Undernourishment`) -> underweight 
+
+# HOSPITAL BEDS
+esg_countries %>%
+  filter(Variable == "Hospital beds (per 1,000 people)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2019`) %>%
+      pivot_longer(
+     cols = `1960`:`2019`,
+     names_to = "Year",
+     values_to = "Hospital_Beds"
+   ) %>%
+   select(`Country Name`, `Year`, `Hospital_Beds`) -> hospitalbed 
+
+# MORTALITY RATE UNDER 5
+esg_countries %>%
+   filter(Variable == "Mortality rate, under-5 (per 1,000 live births)") %>%
+   select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2019`) %>%
+      pivot_longer(
+     cols = `1960`:`2019`,
+     names_to = "Year",
+     values_to = "Mortality_Rate"
+   ) %>%
+   select(`Country Name`, `Year`, `Mortality_Rate`)-> mortality
+
+# FERTILITY RATE
+esg_countries %>%
+  filter(Variable == "Fertility rate, total (births per woman)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1960`:`2019`) %>%
+      pivot_longer(
+     cols = `1960`:`2019`,
+     names_to = "Year",
+     values_to = "Fertility_Rate"
+   ) %>%
+   select(`Country Name`, `Year`, `Fertility_Rate`)-> fertility
+
+# GOV EFFFECTIVENESS
+esg_countries %>%
+  filter(Variable == "Government Effectiveness: Estimate") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1996`:`2019`) %>%
+      pivot_longer(
+     cols = `1996`:`2019`,
+     names_to = "Year",
+     values_to = "Government_Effectiveness"
+   ) %>%
+   select(`Country Name`, `Year`, `Government_Effectiveness`)-> goveffective
+
+# WOMEN IN PARLIAMENT
+esg_countries %>%
+  filter(Variable == "Proportion of seats held by women in national parliaments (%)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1997`:`2019`) %>%
+      pivot_longer(
+     cols = `1997`:`2019`,
+     names_to = "Year",
+     values_to = "Women_Parliament"
+   ) %>%
+   select(`Country Name`, `Year`, `Women_Parliament`) -> womenparliament
+
+# POLITICAL STABILITY
+esg_countries %>%
+  filter(Variable == "Political Stability and Absence of Violence/Terrorism: Estimate") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1996`:`2019`) %>%
+      pivot_longer(
+     cols = `1996`:`2019`,
+     names_to = "Year",
+     values_to = "Political_Stability"
+   ) %>%
+   select(`Country Name`, `Year`, `Political_Stability`)-> politicstability
+
+# RULE OF LAW
+esg_countries %>%
+  filter(Variable == "Rule of Law: Estimate") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1996`:`2019`) %>%
+      pivot_longer(
+     cols = `1996`:`2019`,
+     names_to = "Year",
+     values_to = "Rule_Law"
+   ) %>%
+   select(`Country Name`, `Year`, `Rule_Law`) -> ruleoflaw
+
+# LEGAL RIGHTS INDEX
+esg_countries %>%
+  filter(Variable == "Strength of legal rights index (0=weak to 12=strong)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `2013`:`2019`) %>%
+      pivot_longer(
+     cols = `2013`:`2019`,
+     names_to = "Year",
+     values_to = "Legal_Rights"
+   ) %>%
+   select(`Country Name`, `Year`, `Legal_Rights`) -> legalrights
+
+# GDP
+esg_countries %>%
+  filter(Variable == "GDP growth (annual %)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1961`:`2019`) %>%
+      pivot_longer(
+     cols = `1961`:`2019`,
+     names_to = "Year",
+     values_to = "GDP"
+   ) %>%
+   select(`Country Name`, `Year`, `GDP`)-> gdp
+
+# SCHOOL ENROLLMENT
+esg_countries %>%
+  filter(Variable == "School enrollment, primary and secondary (gross), gender parity index (GPI)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1971`:`2019`) %>%
+      pivot_longer(
+     cols = `1971`:`2019`,
+     names_to = "Year",
+     values_to = "School_Enrollment"
+   ) %>%
+   select(`Country Name`, `Year`, `School_Enrollment`)-> school
+
+# LABOR FORCE
+esg_countries %>%
+  filter(Variable == "Ratio of female to male labor force participation rate (%) (modeled ILO estimate)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1990`:`2019`) %>%
+      pivot_longer(
+     cols = `1990`:`2019`,
+     names_to = "Year",
+     values_to = "Women_LaborForce"
+   ) %>%
+   select(`Country Name`, `Year`, `Women_LaborForce`)-> labor
+
+# VOICE AND ACCOUNTABILITY
+esg_countries %>%
+  filter(Variable == "Voice and Accountability: Estimate") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1996`:`2019`) %>%
+      pivot_longer(
+     cols = `1996`:`2019`,
+     names_to = "Year",
+     values_to = "Voice_Accountability"
+   ) %>%
+   select(`Country Name`, `Year`, `Voice_Accountability`) -> voice
+
+# INTERNET USE
+esg_countries %>%
+  filter(Variable == "Individuals using the Internet (% of population)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1990`:`2019`) %>%
+      pivot_longer(
+     cols = `1990`:`2019`,
+     names_to = "Year",
+     values_to = "Internet_Use"
+   ) %>%
+   select(`Country Name`, `Year`, `Internet_Use`) -> internet
+
+# POPULATION DENSITY
+esg_countries %>%
+  filter(Variable == "Population density (people per sq. km of land area)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1961`:`2019`) %>%
+      pivot_longer(
+     cols = `1961`:`2019`,
+     names_to = "Year",
+     values_to = "Population_Density"
+   ) %>%
+   select(`Country Name`, `Year`, `Population_Density`)-> density
+
+# LITERACY RATE
+esg_countries %>%
+  filter(Variable == "Literacy rate, adult total (% of people ages 15 and above)") %>%
+  select(`Country Name`, `Country Code`, Variable, `Variable code`, `1972`:`2019`) %>%
+      pivot_longer(
+     cols = `1972`:`2010`,
+     names_to = "Year",
+     values_to = "Literacy_Rate"
+   ) %>%
+   select(`Country Name`, `Year`, `Literacy_Rate`) -> literacy
+```
+
+```{r, message = FALSE}
+left_join(lifeexp, drought, by = c("Year", "Country Name")) -> df1
+left_join(df1, fossilfuels, by = c("Year", "Country Name")) -> df2 
+left_join(df2, co2, by = c("Year", "Country Name")) -> df3 
+left_join(df3, overweight, by = c("Year", "Country Name")) -> df4 
+left_join(df4, underweight, by = c("Year", "Country Name")) -> df5 
+left_join(df5, hospitalbed, by = c("Year", "Country Name")) -> df6 
+left_join(df6, mortality, by = c("Year", "Country Name")) -> df7 
+left_join(df7, fertility, by = c("Year", "Country Name")) -> df8 
+left_join(df8, goveffective, by = c("Year", "Country Name")) -> df9 
+left_join(df9, womenparliament, by = c("Year", "Country Name")) -> df10 
+left_join(df10, politicstability, by = c("Year", "Country Name")) -> df11
+left_join(df11, ruleoflaw, by = c("Year", "Country Name")) -> df12 
+left_join(df12, legalrights, by = c("Year", "Country Name")) -> df13 
+left_join(df13, gdp, by = c("Year", "Country Name")) -> df14 
+left_join(df14, school, by = c("Year", "Country Name")) -> df15 
+left_join(df15, labor, by = c("Year", "Country Name")) -> df16 
+left_join(df16, voice, by = c("Year", "Country Name")) -> df17 
+left_join(df17, internet, by = c("Year", "Country Name")) -> df18
+left_join(df18, density, by = c("Year", "Country Name")) -> df19
+left_join(df19, literacy, by = c("Year", "Country Name")) -> esg 
+esg %>%
+  rename(Country = "Country Name") %>%
+  mutate(Year = as.numeric(Year)) %>%
+  filter(!is.na(Life_Exp)) %>%
+  mutate(log_lifeexp = log(Life_Exp)) -> esg
+head(esg)
+
+```
+
+```{r ESGSUB}
+map_dbl(esg, ~mean(is.na(.)))
+
+nrow(esg)
+
+esg %>%
+  discard(map_dbl(esg, ~mean(is.na(.))) > 0.7) %>%
+  filter(!is.na(Country),
+         !is.na(Year),
+         !is.na(Life_Exp),
+         !is.na(Fossil_Fuels),
+         !is.na(CO2),
+         !is.na(Overweight),
+         !is.na(Fertility_Rate),
+         !is.na(GDP),
+         !is.na(Population_Density),
+         !is.na(School_Enrollment),
+         !is.na(Women_LaborForce),
+         !is.na(Internet_Use),
+         !is.na(Hospital_Beds),
+         !is.na(Government_Effectiveness),
+         !is.na(Women_Parliament),
+         !is.na(Political_Stability),
+         !is.na(Rule_Law),
+         !is.na(School_Enrollment),
+         !is.na(Voice_Accountability)) %>%
+  select(-"Mortality_Rate") ->
+  esg_sub
+head(esg_sub)
+
+lmall <- lme(fixed = log_lifeexp ~ Fossil_Fuels + CO2 + Overweight + Fertility_Rate + GDP + Population_Density + School_Enrollment + Women_LaborForce + Internet_Use + Hospital_Beds + Government_Effectiveness + Women_Parliament + Political_Stability + Rule_Law + Voice_Accountability, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_sub)
+tidy(lmall)
+plot(lmall)
+```
+
+# EXPLORATORY DATA ANALYSIS
+
+```{r EDA}
+ggpairs(esg_sub, columns = 3:8)
+ggpairs(esg_sub, columns = c(3, 9:13))
+ggpairs(esg_sub, columns = c(3, 14:18))
+```
+
+```{r}
+esg_sub %>%
+  filter(!Fossil_Fuels == 0) %>%
+  filter(!Women_Parliament == 0) %>%
+  mutate(log_ff = log(Fossil_Fuels)) %>%
+  mutate(log_co2 = log(CO2)) %>%
+  mutate(log_overweight = log(Overweight)) %>%
+  mutate(log_fertility = log(Fertility_Rate)) %>%
+  mutate(log_pop = log(Population_Density)) %>%
+  mutate(log_school = log(School_Enrollment)) %>%
+  mutate(log_wlabor = log(Women_LaborForce)) %>%
+  mutate(log_internet = log(Internet_Use)) %>%
+  mutate(log_beds = log(Hospital_Beds)) %>%
+  mutate(log_wparliament = log(Women_Parliament))  -> esg_logs
+head(esg_logs)
+```
+
+
+
+# SIMPLE LINEAR REGRESSION & RESIDUAL PLOTS
+
+```{r, message= FALSE}
+# FOSSIL FUELS
+lmff <- lme(fixed = log_lifeexp ~ Fossil_Fuels, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmff)
+
+aff <- augment(lmff)
+qplot(x = .fitted, y = .resid, data = aff) + geom_hline(yintercept = 0)
+```
+```{r }
+# CO2
+lmco2 <- lme(fixed = log_lifeexp ~ log_co2, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmco2)
+
+aco2 <- augment(lmco2)
+qplot(x = .fitted, y = .resid, data = aco2) + geom_hline(yintercept = 0)
+```
+```{r }
+# OVERWEIGHT
+lmoverweight <- lme(fixed = log_lifeexp ~ Overweight, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmoverweight)
+
+aoverweight <- augment(lmoverweight)
+qplot(x = .fitted, y = .resid, data = aoverweight) + geom_hline(yintercept = 0)
+```
+```{r}
+# HOSPITAL BEDS
+lmhosp <- lme(fixed = log_lifeexp ~ log_beds, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmhosp)
+
+ahosp <- augment(lmhosp)
+qplot(x = .fitted, y = .resid, data = ahosp) + geom_hline(yintercept = 0)
+```
+```{r }
+# FERTILITY RATE
+lmfertility <- lme(fixed = log_lifeexp ~ log_fertility, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmfertility)
+
+afertility <- augment(lmfertility)
+qplot(x = .fitted, y = .resid, data = afertility) + geom_hline(yintercept = 0)
+```
+```{r}
+
+# GOV EFFECTIVENESS 
+lmgov <- lme(fixed = log_lifeexp ~ Government_Effectiveness, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmgov)
+
+agov <- augment(lmgov)
+qplot(x = .fitted, y = .resid, data = agov) + geom_hline(yintercept = 0)
+```
+```{r}
+
+# WOMEN IN PARLIAMENT
+lmwomen <- lme(fixed = log_lifeexp ~ log_wparliament, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmwomen)
+
+awomen <- augment(lmwomen)
+qplot(x = .fitted, y = .resid, data = awomen) + geom_hline(yintercept = 0)
+```
+```{r }
+# POLITICAL STABILITY
+lmpolitical <- lme(fixed = Life_Exp ~ Political_Stability, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmpolitical)
+
+apolitical <- augment(lmpolitical)
+qplot(x = .fitted, y = .resid, data = apolitical) + geom_hline(yintercept = 0)
+```
+```{r }
+# RULE OF LAW 
+lmrule <- lme(fixed = Life_Exp ~ Rule_Law, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmrule)
+
+arule <- augment(lmrule)
+qplot(x = .fitted, y = .resid, data = arule) + geom_hline(yintercept = 0)
+```
+```{r }
+# GDP 
+lmgdp <- lme(fixed = log_lifeexp ~ GDP, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmgdp)
+
+agdp <- augment(lmgdp)
+qplot(x = .fitted, y = .resid, data = agdp) + geom_hline(yintercept = 0)
+```
+```{r }
+# SCHOOL ENROLLMENT
+lmschool <- lme(fixed = log_lifeexp ~ School_Enrollment, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmschool)
+
+aschool <- augment(lmschool)
+qplot(x = .fitted, y = .resid, data = aschool) + geom_hline(yintercept = 0)
+```
+```{r }
+
+# WOMEN'S LABOR FORCE
+lmlabor <- lme(fixed = log_lifeexp ~ log_wlabor, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmlabor)
+
+alabor <- augment(lmlabor)
+qplot(x = .fitted, y = .resid, data = alabor) + geom_hline(yintercept = 0)
+```
+```{r }
+# VOICE AND ACCOUNTABILITY
+lmvoice <- lme(fixed = Life_Exp ~ Voice_Accountability, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmvoice)
+
+avoice <- augment(lmvoice)
+qplot(x = .fitted, y = .resid, data = avoice) + geom_hline(yintercept = 0)
+```
+```{r }
+# INTERNET USE
+lminternet <- lme(fixed = log_lifeexp ~ log_internet, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lminternet)
+
+ainternet <- augment(lminternet)
+qplot(x = .fitted, y = .resid, data = ainternet) + geom_hline(yintercept = 0)
+```
+```{r }
+# POPULATION DENSITY
+lmdensity <- lme(fixed = log_lifeexp ~ log_pop, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+summary(lmdensity)
+
+adensity <- augment(lmdensity)
+qplot(x = .fitted, y = .resid, data = adensity) + geom_hline(yintercept = 0)
+```
+
+```{r}
+lmall <- lme(fixed = log_lifeexp ~ Fossil_Fuels + log_co2 + Overweight + log_fertility + GDP + log_pop + School_Enrollment + log_wlabor + log_internet + log_beds + Government_Effectiveness + log_wparliament + Political_Stability + Rule_Law + Voice_Accountability, 
+              random = ~ 1 | Country,
+              correlation = corAR1(form = ~ Year),
+              data = esg_logs)
+tidy(lmall)
+plot(lmall)
+```
+# Examining Multicollinearity 
+
+```{r}
+vif(lmall)
+```
+
+# F-Tests
+```{r}
+broom.mixed::glance(lmall)
+a_all <- augment(lmall)
+
+sse_f <- sum(a_all$.resid^2)
+df_f <- nrow(esg_logs) - 16 ## four parameters
+sse_r <- sum((esg_logs$log_lifeexp - mean(esg_logs$log_lifeexp))^2)
+df_r <- nrow(esg_logs) - 1 ## one parameter (beta_0)
+
+F_star <- ((sse_r - sse_f) / (df_r - df_f)) / (sse_f / df_f)
+F_star
+
+pf(q = F_star, df1 = df_r - df_f, df2 = df_f, lower.tail = FALSE)
+```
+
+## Final Project Report
+
+Since 2019 The Word Bank publishes a Sovereign ESG Data Framework Environment, Social, and Governance. This framework is divided into 3 pillars (Environmental, Social and Governance) which is based on their 17 sustainable development goals. The purpose is to help potential investors and shed light on countries’ sustainability performance. As for their design study, they collect data from different sources but their main data source is  the World Bank.We are interested in studying the associations that exist between the variables across these themes; specifically, we are interested in looking at expected lifespan as the response variable in our multiple regression model. We specifically are interested in seeing how the variables impact life expectancy across groups of people, such as gender, development status, and income, regions of the world including Latin America, European Union, Central Asia, and East Asia and the Pacific, and over a time span of 5 years. 
+
+The variables we are interested in analyzing to study their association to life expectancy include: (1)  CO2 emissions (metric tons per capita) , (2) prevalence of overweight (% of adults), (3) hospital beds (per 1000 people) , (4) fertility rate (births per women), (5) government effectiveness (estimate), (6) portion of seats held by women in national parliaments (%), (7) political stability and absence of violence/terrorism (estimate), (8) GDP (annual growth %), (9) school enrollment primary and secondary and gender parity index (gross) , (10) ratio of female to male labor force participation rate (%), (11) voice and accountability (estimate), (12) population density (people per sq. km of land area)  and (13) fossil fuel (% of total), (14) Rule of Law, (15) Internet Usage. We are choosing these variables to explore different interests across group members and to explore possible associations among different categories of indicators (i.e. the impact of climate change on life expectancy). The sample size is 1,081. We wish to examine different variables that are not traditionally associated with life expectancy or social determinants of health. 
+
+## Verification of Model Assumptions
+
+The first assumption of the model of independence is not met because there are correlations of data points within each country over time. To remedy this, we used a linear mixed effect model that accounted for the correlation within countries. The assumptions of constant variance and linearity were assessed and met after performing residual analysis and then necessary log transformations on our response variable and predictor variables as needed. Furthermore, we assessed correlation between predictor variables by using the variance inflation factor that determined that the VIF of each variable was very close to 1 and there was no hidden multicollinearity between variables. 
+
+## Statistical Methods
+
+The first statistical method used was the overall F-test. The very low p-value of 8.303119e-130 provided evidence that at least one variable was very relevant to our data. The second method was transformations. This remedied curvature and nonconstant variance, but we ran into issues with many negative values that prevented the ability to do a log transformation. The third statistical method was using simple linear regression of individual variables, which gave us the ability to see how the variables interacted with our response variable and identified the necessary transformations. We also performed residual analysis and variance inflation factor as stated above. 
+
+## Final Regression Models
+
+The following is the model used for our Multiple Linear Regression model: 
+log(Predicted life expectancy) = 3.89 - .00009* Fossil Fuels - .00007* log(CO2) + .005* Overweight - .0059* log(Fertility) - .000038* GDP + .024* log(Population Density) + .028* School Enrollment - .00075* log(Women’s Labor Participation Rate) + .0035* log(Internet Usage) + .0019* log(Hospital Beds) + .0013* Government Effectiveness + .000053* log(Women’s Participation in Parliament) + .00075* Political Stability + .0027* Rule of Law - .00038* Voice and Accountability.
+
+Transformation was conducted by applying log to the response variable, life expectancy, and some of the predictor variables listed in the model. 
+
