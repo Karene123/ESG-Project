@@ -30,7 +30,8 @@ As part of this project, the following statistical methods were utilized:
 - Simple Linear Regression
 
 We were able to provide a model including 5 variables out of the original 15. 
-The presentation is under:
+
+The presentation is under: ESG Regression Final
 
 ![ESG pic1](https://github.com/Karene123/ESG-Project/assets/70621033/22c91fc9-dfbb-4c54-b480-b0da86948984)
 ![ESG pic2](https://github.com/Karene123/ESG-Project/assets/70621033/04ac5925-08be-44c3-bfd2-5a604fa162f7)
