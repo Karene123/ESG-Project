@@ -32,6 +32,6 @@ As part of this project, the following statistical methods were utilized:
 We were able to provide a model including 5 variables out of the original 15. 
 The presentation is under:
 
+![ESG pic1](https://github.com/Karene123/ESG-Project/assets/70621033/22c91fc9-dfbb-4c54-b480-b0da86948984)
+![ESG pic2](https://github.com/Karene123/ESG-Project/assets/70621033/04ac5925-08be-44c3-bfd2-5a604fa162f7)
 
-![image](https://github.com/Karene123/ESG-Project/assets/70621033/d694fb90-b3fa-490c-878d-0095d628c46a)
-![image](https://github.com/Karene123/ESG-Project/assets/70621033/4d319fef-8ef2-48c9-b8a7-bfd33352bd26)
