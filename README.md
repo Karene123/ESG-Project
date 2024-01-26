@@ -1,4 +1,4 @@
-# ESG-Project for Regression (STAT 415-615)
+# ESG-Project for Regression (STAT 615)
 
 <!-- PROJECT LOGO -->
 <br />
@@ -14,11 +14,11 @@
 3. [Prerequisites](#Prerequisites)
 4. [Utilized Python Libraries](#Utilized-Python-Libraries)
 5. [Installation](#Installation)
-6. [Project Motivation](#Project-Motivation)
-7. [Summary of Results](#Summary-of-Results)
-9. [Contributions](#Contributions)
-10. [Acknowledgments](#Acknowledgments)
-11. [File Description](#File-Description)
+6. [Challenges](#Challenges)
+7. [Summary of Results and Methods Used](#Summary-of-Results-and-Methods-Used)
+8. [Contributions](#Contributions)
+9. [Acknowledgments](#Acknowledgments)
+10. [Graphs](#Graphs)
 
 
 # Environment, Social, and Government Data (ESG) from the World Bank Data Bank
@@ -61,25 +61,91 @@ Install and Import those libraries in order to access the project.
 
 ### Utilized Python Libraries:
 
-* [NumPy](http://www.numpy.org/)
-* [Pandas](http://pandas.pydata.org/)
-* [Scikit-learn](http://scikit-learn.org/stable/)
-* [Matplotlib](http://matplotlib.org/)
-* [Seaborn](https://seaborn.pydata.org/)
-* [Folium](https://pypi.org/project/folium/)
-* [SciPy](https://www.scipy.org/)
-* [lightgbm](https://lightgbm.readthedocs.io/en/v3.3.2/)
+* [Car](https://cran.r-project.org/web/packages/car/index.html)
+* [GGally](https://cran.r-project.org/web/packages/GGally/index.html)
+* [Broom Mixed](https://cran.r-project.org/web/packages/broom.mixed/index.html)
+* [Nlme](https://svn.r-project.org/R-packages/trunk/nlme/R/nlme.R)
+* [Broom](https://broom.tidymodels.org/)
+* [Stringr](https://stringr.tidyverse.org/)
+* [Tidyverse](https://dplyr.tidyverse.org/)
+
+### Installation
+
+* Car
+  ```sh
+  install.packages("car")
+  ```
+* GGally
+  ```sh
+  install.packages("ggally")
+  ```
+* Broom Mixed
+  ```sh
+  install.packages("broom.mixed")
+  ```
+* Nlme
+  ```sh
+  install.packages("nlme")
+  ```
+* Broom
+  ```sh
+  install.packages("broom")
+  ```
+* Stringr
+  ```sh
+  install.packages("stringr")
+  ```
+* Tidyverse
+  ```sh
+  install.packages("tidyverse")
+  ```
+  
+  <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+  ## Challenges
+  The initial assumption of the independence model is violated due to correlations among data points within each country over time. To address this issue, we applied a linear mixed-effects model, considering the correlation within countries. After conducting residual analysis and implementing required log transformations, we assessed and satisfied the assumptions of constant variance and linearity for both the response and predictor variables.
+
+  ## Summary of Results
 
 We wished to examine different variables that are not traditionally associated with life expectancy or social determinants of health. 
-
 As part of this project, the following statistical methods were utilized:
 - Overall F-test
 - Transformations involving the use of log
 - Simple Linear Regression
 
-We were able to provide a model including 5 variables out of the original 15. 
+We were able to provide a model including 14 variables out of the original 17.
+- Fossil Fuels
+- log(C02)
+- log(Fertility)
+- GDP
+- log(Population Density)
+- School Enrollment
+- log(Women’s Labor Participation Rate)
+- log(Internet Usage)
+- log(Hospital Beds)
+- Government Effectiveness
+- log(Women's Participation in Parliament)
+- Political Stability
+- Rule of Law
+- Voice and Accountability
+  
+The following is the model used for our Multiple Linear Regression model: 
+log(Predicted life expectancy) = 3.89 - .00009* Fossil Fuels - .00007* log(CO2) + .005* Overweight - .0059* log(Fertility) - .000038* GDP + .024* log(Population Density) + .028* School Enrollment - .00075* log(Women’s Labor Participation Rate) + .0035* log(Internet Usage) + .0019* log(Hospital Beds) + .0013* Government Effectiveness + .000053* log(Women’s Participation in Parliament) + .00075* Political Stability + .0027* Rule of Law - .00038* Voice and Accountability.
+
+
+<p align="right">(<a href="#README-top">back to top</a>)</p>
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+I worked closely with my classmates (Lindsay, Elizabeth, and Micheala) to bring this project to fruition, fostering a collaborative environment where each team member's unique strengths contributed to the project's success. Through open communication and shared dedication, we overcame challenges and celebrated our collective achievements, solidifying the importance of teamwork in delivering outstanding results.
+
+- [ESG image](https://www.kiplinger.com/investing/esg/what-is-esg)
 
 The presentation is under: ESG Regression Final
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Graphs
 
 ![ESG pic1](https://github.com/Karene123/ESG-Project/assets/70621033/22c91fc9-dfbb-4c54-b480-b0da86948984)
 ![ESG pic2](https://github.com/Karene123/ESG-Project/assets/70621033/04ac5925-08be-44c3-bfd2-5a604fa162f7)
